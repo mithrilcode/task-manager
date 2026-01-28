@@ -30,16 +30,30 @@ def create_task(
     return task
 
 
-def get_tasks(db: Session) -> list[Task]:
+def get_tasks(
+    db: Session,
+    *,
+    limit: int = 20,
+    offset: int = 0,
+    status: Optional[TaskStatus] = None,
+    priority: Optional[TaskPriority] = None,
+) -> list[Task]:
     stmt = select(Task)
-    result = db.execute(stmt)
-    return result.scalars().all()
+
+    if status is not None:
+        stmt = stmt.where(Task.status == status)
+
+    if priority is not None:
+        stmt = stmt.where(Task.priority == priority)
+
+    stmt = stmt.limit(limit).offset(offset)
+
+    return db.execute(stmt).scalars().all()
 
 
 def get_task_by_id(db: Session, task_id: UUID) -> Optional[Task]:
     stmt = select(Task).where(Task.id == task_id)
-    result = db.execute(stmt)
-    return result.scalar_one_or_none()
+    return db.execute(stmt).scalar_one_or_none()
 
 
 def update_task(
