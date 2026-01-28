@@ -12,10 +12,13 @@ from backend_app.crud.task import (
     update_task,
     delete_task,
 )
+from backend_app.api.auth import router as auth_router
 from backend_app.models.task import TaskStatus, TaskPriority
 from backend_app.schemas.task import TaskCreate, TaskRead, TaskUpdate
 
 app = FastAPI(title="Task Manager API")
+
+app.include_router(auth_router)
 
 
 @app.get("/health")
