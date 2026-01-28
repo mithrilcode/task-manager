@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, asc, desc
 from sqlalchemy.orm import Session
 
 from backend_app.models.task import Task, TaskPriority, TaskStatus
@@ -37,7 +37,15 @@ def get_tasks(
     offset: int = 0,
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
+    sort: str = "created_at",
+    order: str = "desc"
 ) -> list[Task]:
+    sort_columns = {
+        "created_at": Task.created_at,
+        "due_date": Task.due_date,
+        "priority": Task.priority,
+    }
+
     stmt = select(Task)
 
     if status is not None:
@@ -46,7 +54,10 @@ def get_tasks(
     if priority is not None:
         stmt = stmt.where(Task.priority == priority)
 
-    stmt = stmt.limit(limit).offset(offset)
+    column = sort_columns[sort]
+    order_by = desc(column) if order == "desc" else asc(column)
+
+    stmt = stmt.order_by(order_by).limit(limit).offset(offset)
 
     return db.execute(stmt).scalars().all()
 

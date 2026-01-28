@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 from uuid import UUID
 
 from fastapi import FastAPI, Depends, HTTPException, Query
@@ -31,6 +31,8 @@ def read_tasks(
     offset: int = Query(0, ge=0),
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
+    sort: Literal["created_at", "due_date", "priority"] = "created _at",
+    order: Literal["asc", "desc"] = "desc"
 ):
     return get_tasks(
         db,
@@ -38,6 +40,8 @@ def read_tasks(
         offset=offset,
         status=status,
         priority=priority,
+        sort=sort,
+        order=order
     )
 
 
