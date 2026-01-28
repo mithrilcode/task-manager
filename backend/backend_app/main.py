@@ -1,6 +1,5 @@
-from backend_app.database.base import Base
-import backend_app.models  # noqa: F401
+def main():
+    print("Backend app initialized")
 
-print(Base.metadata.tables.keys())
-
-
+if __name__ == "__main__":
+    main()
