@@ -8,8 +8,10 @@ from sqlalchemy import (
     Enum as SQLEnum,
     String,
     Text,
+    ForeignKey
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend_app.database.base import Base
 
@@ -73,3 +75,14 @@ class Task(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+    user_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=True,
+    )
+
+    user = relationship(
+        "User",
+        back_populates="tasks",
+    )
+
