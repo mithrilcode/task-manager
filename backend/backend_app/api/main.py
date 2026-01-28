@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from backend_app.api.dependencies import get_db
 from backend_app.crud.task import get_tasks, create_task
-from backend_app.models.task import TaskPriority
+from backend_app.schemas.task import TaskCreate, TaskRead
 
 app = FastAPI(title="Task Manager API")
 
@@ -14,26 +14,21 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.get("/tasks")
+@app.get("/tasks", response_model=list[TaskRead])
 def read_tasks(db: Session = Depends(get_db)):
-    tasks = get_tasks(db)
-    return tasks
+    return get_tasks(db)
 
 
-@app.post("/tasks")
+@app.post("/tasks", response_model=TaskRead)
 def create_task_endpoint(
-        *,
-        title: str,
-        priority: TaskPriority,
-        due_date: datetime,
-        description: str | None = None,
-        db: Session = Depends(get_db),
+    task_in: TaskCreate,
+    db: Session = Depends(get_db),
 ):
     task = create_task(
         db,
-        title=title,
-        priority=priority,
-        due_date=due_date,
-        description=description,
+        title=task_in.title,
+        priority=task_in.priority,
+        due_date=task_in.due_date,
+        description=task_in.description,
     )
     return task
