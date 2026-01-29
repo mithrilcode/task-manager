@@ -55,7 +55,8 @@ class User(Base):
         nullable=False,
     )
 
-    tasks = relationship(
+    tasks: Mapped[list["Task"]] = relationship(
         "Task",
         back_populates="user",
+        cascade="all, delete-orphan",
     )

@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 from backend_app.api.dependencies import get_db
 from backend_app.core.security import hash_password, verify_password
 from backend_app.core.token import create_access_token
-from backend_app.schemas.user import LoginRequest, Token
+from backend_app.schemas.user import LoginRequest, Token, UserCreate, UserRead
 from backend_app.models.user import User
-from backend_app.schemas.user import UserCreate, UserRead
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"],
 )
+
 
 @router.post(
     "/register",
@@ -21,12 +21,18 @@ router = APIRouter(
 def register_user(
     user_in: UserCreate,
     db: Session = Depends(get_db),
-):
+) -> UserRead:
     if db.query(User).filter(User.email == user_in.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
 
     if db.query(User).filter(User.username == user_in.username).first():
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already taken",
+        )
 
     user = User(
         email=user_in.email,
@@ -45,7 +51,7 @@ def register_user(
 def login_user(
     credentials: LoginRequest,
     db: Session = Depends(get_db),
-):
+) -> Token:
     user = (
         db.query(User)
         .filter(
@@ -68,4 +74,7 @@ def login_user(
         data={"sub": str(user.id)}
     )
 
-    return {"access_token": access_token}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
