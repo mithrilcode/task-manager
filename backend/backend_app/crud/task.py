@@ -15,6 +15,7 @@ def create_task(
     priority: TaskPriority,
     due_date: datetime,
     description: Optional[str] = None,
+    user_id: UUID,
 ) -> Task:
     task = Task(
         title=title,
@@ -22,6 +23,7 @@ def create_task(
         due_date=due_date,
         description=description,
         status=TaskStatus.todo,
+        user_id=user_id,
     )
 
     db.add(task)
