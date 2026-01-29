@@ -4,9 +4,8 @@ from sqlalchemy.orm import Session
 from backend_app.api.dependencies import get_db
 from backend_app.core.security import hash_password, verify_password
 from backend_app.core.token import create_access_token
-from backend_app.schemas.user import LoginRequest, Token
+from backend_app.schemas.user import LoginRequest, Token, UserCreate, UserRead
 from backend_app.models.user import User
-from backend_app.schemas.user import UserCreate, UserRead
 
 router = APIRouter(
     prefix="/auth",
