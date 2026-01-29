@@ -51,11 +51,29 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Vite / React build output
-dist/
-build/
 
 # =========================
 # OS
 # =========================
 .DS_Store
 Thumbs.db
+
+# Logs
+logs
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
