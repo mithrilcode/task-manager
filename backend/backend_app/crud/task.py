@@ -72,6 +72,19 @@ def get_task_by_id(db: Session, task_id: UUID) -> Optional[Task]:
     return db.execute(stmt).scalar_one_or_none()
 
 
+def get_task_for_user(
+    db: Session,
+    *,
+    task_id: UUID,
+    user_id: UUID,
+) -> Optional[Task]:
+    stmt = select(Task).where(
+        Task.id == task_id,
+        Task.user_id == user_id,
+    )
+    return db.execute(stmt).scalar_one_or_none()
+
+
 def update_task(
     db: Session,
     *,

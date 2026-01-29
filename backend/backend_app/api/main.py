@@ -8,7 +8,7 @@ from backend_app.api.dependencies import get_db
 from backend_app.crud.task import (
     get_tasks,
     create_task,
-    get_task_by_id,
+    get_task_for_user,
     update_task,
     delete_task,
 )
@@ -82,9 +82,14 @@ def read_task(task_id: UUID, db: Session = Depends(get_db)):
 def update_task_endpoint(
     task_id: UUID,
     task_in: TaskUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    task = get_task_by_id(db, task_id)
+    task = get_task_for_user(
+        db,
+        task_id=task_id,
+        user_id=current_user.id,
+    )
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -100,8 +105,16 @@ def update_task_endpoint(
 
 
 @app.delete("/tasks/{task_id}", status_code=204)
-def delete_task_endpoint(task_id: UUID, db: Session = Depends(get_db)) -> None:
-    task = get_task_by_id(db, task_id)
+def delete_task_endpoint(
+        task_id: UUID,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+) -> None:
+    task = get_task_for_user(
+        db,
+        task_id=task_id,
+        user_id=current_user.id,
+    )
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
 
