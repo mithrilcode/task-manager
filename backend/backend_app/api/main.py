@@ -15,6 +15,9 @@ from backend_app.crud.task import (
 from backend_app.api.auth import router as auth_router
 from backend_app.models.task import TaskStatus, TaskPriority
 from backend_app.schemas.task import TaskCreate, TaskRead, TaskUpdate
+from backend_app.core.auth import get_current_user
+from backend_app.models.user import User
+
 
 app = FastAPI(title="Task Manager API")
 
@@ -29,14 +32,16 @@ def health_check() -> dict[str, str]:
 @app.get("/tasks", response_model=list[TaskRead])
 def read_tasks(
     *,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
-    sort: Literal["created_at", "due_date", "priority"] = "created _at",
+    sort: Literal["created_at", "due_date", "priority"] = "created_at",
     order: Literal["asc", "desc"] = "desc"
 ):
+
     return get_tasks(
         db,
         limit=limit,
@@ -51,6 +56,7 @@ def read_tasks(
 @app.post("/tasks", response_model=TaskRead)
 def create_task_endpoint(
     task_in: TaskCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return create_task(
@@ -59,6 +65,7 @@ def create_task_endpoint(
         priority=task_in.priority,
         due_date=task_in.due_date,
         description=task_in.description,
+        user_id=current_user.id,
     )
 
 
