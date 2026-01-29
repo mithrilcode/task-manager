@@ -12,6 +12,7 @@ router = APIRouter(
     tags=["auth"],
 )
 
+
 @router.post(
     "/register",
     response_model=UserRead,
@@ -20,12 +21,18 @@ router = APIRouter(
 def register_user(
     user_in: UserCreate,
     db: Session = Depends(get_db),
-):
+) -> UserRead:
     if db.query(User).filter(User.email == user_in.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
 
     if db.query(User).filter(User.username == user_in.username).first():
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already taken",
+        )
 
     user = User(
         email=user_in.email,
@@ -44,7 +51,7 @@ def register_user(
 def login_user(
     credentials: LoginRequest,
     db: Session = Depends(get_db),
-):
+) -> Token:
     user = (
         db.query(User)
         .filter(
@@ -67,4 +74,7 @@ def login_user(
         data={"sub": str(user.id)}
     )
 
-    return {"access_token": access_token}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
