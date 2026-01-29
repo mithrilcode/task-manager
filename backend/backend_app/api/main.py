@@ -71,11 +71,20 @@ def create_task_endpoint(
 
 
 @app.get("/tasks/{task_id}", response_model=TaskRead)
-def read_task(task_id: UUID, db: Session = Depends(get_db)):
-    task = get_task_by_id(db, task_id)
+def read_task(
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = get_task_for_user(
+        db,
+        task_id=task_id,
+        user_id=current_user.id,
+    )
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return task
+
 
 
 @app.patch("/tasks/{task_id}", response_model=TaskRead)
