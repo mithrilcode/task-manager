@@ -35,6 +35,7 @@ def create_task(
 def get_tasks(
     db: Session,
     *,
+    user_id: UUID,
     limit: int = 20,
     offset: int = 0,
     status: Optional[TaskStatus] = None,
@@ -49,6 +50,8 @@ def get_tasks(
     }
 
     stmt = select(Task)
+
+    stmt = stmt.where(Task.user_id == user_id)
 
     if status is not None:
         stmt = stmt.where(Task.status == status)

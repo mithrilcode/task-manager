@@ -44,6 +44,7 @@ def read_tasks(
 
     return get_tasks(
         db,
+        user_id=current_user.id,
         limit=limit,
         offset=offset,
         status=status,
