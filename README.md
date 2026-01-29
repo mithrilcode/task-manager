@@ -1,14 +1,16 @@
 # Task Manager
 
-A full-stack Task Manager application built as a learning-focused, production-style project.
+A full-stack **Task Manager** application built as a learning-focused, production-style project.
 
 This repository emphasizes:
 - clean architecture
 - explicit database modeling
 - proper migrations
-- secure configuration practices
+- secure authentication
+- clear separation of concerns
+- real-world backend + frontend workflows
 
-The goal is to rebuild fluency with Python backend development while following real-world best practices.
+The goal is to rebuild fluency with **Python backend development** and modern **React frontend development** while following industry best practices.
 
 ---
 
@@ -19,49 +21,63 @@ This repository uses a **monorepo** layout:
 task-manager/
 ├── backend/
 │ ├── backend_app/
+│ │ ├── api/
+│ │ ├── core/
+│ │ ├── crud/
 │ │ ├── database/
-│ │ │ ├── base.py
-│ │ │ ├── engine.py
-│ │ │ └── session.py
 │ │ ├── models/
-│ │ │ └── task.py
-│ │ ├── main.py
-│ │ └── init.py
+│ │ ├── schemas/
+│ │ └── api/main.py
 │ ├── migrations/
-│ │ ├── env.py
-│ │ ├── versions/
-│ │ └── script.py.mako
 │ ├── alembic.ini
 │ └── tests/
+├── frontend/
+│ ├── src/
+│ ├── index.html
+│ ├── package.json
+│ └── vite.config.ts
 ├── .env.example
 ├── .gitignore
 └── README.md
+
 
 ---
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- Python 3.12
+- Python 3.12+
+- FastAPI
 - PostgreSQL 16
 - SQLAlchemy 2.x
-- Alembic
+- Alembic (migrations)
 - psycopg (PostgreSQL driver)
+- Pydantic v2
+- JWT authentication (python-jose, passlib)
 
-### Frontend (planned)
+### Frontend
+- Node.js (LTS)
 - React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Axios (planned)
+- localStorage-based auth persistence
 
 ---
 
 ## 🧠 Core Concepts Used
 
-- SQLAlchemy ORM with modern Declarative Base
+- SQLAlchemy ORM (2.x style)
 - UUID primary keys
 - Enum-based domain modeling
 - UTC timestamps
 - Database migrations (Alembic)
+- JWT authentication & authorization
+- Task ownership enforcement
 - Non-superuser database roles
 - Environment-based configuration
+- Monorepo workflow
 
 ---
 
@@ -75,8 +91,7 @@ This project uses **PostgreSQL 16** with a **dedicated, non-superuser role**, fo
 
 Install **PostgreSQL 16** for your operating system and ensure the database service is running.
 
-Verify the installation:
-
+Verify installation:
 ```bash
 psql --version
 ```
@@ -88,42 +103,130 @@ Log into PostgreSQL as a superuser (usually postgres):
 psql -U postgres
 ```
 
-Create the development database:
-```bash
+Create the database:
+```sql
 CREATE DATABASE task_manager_dev;
 ```
 
 ### 3️⃣ Create a Dedicated Application Role
-
-Create a non-superuser role for the application:
 ```sql
 CREATE ROLE task_manager_user
 WITH LOGIN
 PASSWORD 'your_password_here';
 ```
 
-This role is used only by the application.
-
-### 4️⃣ Grant Database Permissions
-
-Grant access to the database:
+### 4️⃣ Grant Required Permissions
 ```sql
 GRANT ALL PRIVILEGES ON DATABASE task_manager_dev TO task_manager_user;
-```
-
-Grant schema permissions (required for Alembic migrations):
-```sql
 GRANT USAGE, CREATE ON SCHEMA public TO task_manager_user;
 ```
 
 ### 5️⃣ Verify Access
-
-Exit psql and reconnect using the application role:
 ```bash
 psql -U task_manager_user -d task_manager_dev
 ```
 
-If successful, you should see:
-```ini
+Expected prompt:
+```text
 task_manager_dev=>
 ```
+
+## 🔐 Environment Configuration
+Create a .env file in the project root using .env.example as a reference.
+```dotenv
+SECRET_KEY=your_secret_key_here
+DB_USER=task_manager_user
+DB_PASSWORD=your_password_here
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=task_manager_dev
+```
+
+##🐍 Backend Setup & Running the API
+
+### 1️⃣ Create and Activate Virtual Environment
+From the project root:
+```bash
+python -m venv .venv
+```
+Activate it:
+```bash
+.venv\Scripts\activate
+```
+### 2️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Run Database Migrations
+
+From backend/:
+
+```bash
+alembic upgrade head
+```
+
+### 4️⃣ Start the API Server
+
+From backend/:
+```bash
+uvicorn backend_app.api.main:app --reload
+```
+
+API will be available at:
+```arduino
+http://127.0.0.1:8000
+```
+
+Docs:
+```arduino
+http://127.0.0.1:8000/docs
+```
+
+## ⚛️ Frontend Setup & Running Vite
+
+### 1️⃣ Install Node.js
+
+Install Node.js LTS from:
+https://nodejs.org
+
+Verify: 
+```bash
+node -v
+npm -v
+```
+
+### 2️⃣ Install Frontend Dependencies
+```bash
+cd frontend
+npm install
+```
+
+### 3️⃣ Start the Frontend Dev Server
+```bash
+npm run dev
+```
+Frontend will be available at:
+```arduino
+http://localhost:5173
+```
+
+## 🔮 Roadmap
+
+- Frontend authentication flow
+
+- Task CRUD UI
+
+- User profiles
+
+- Sub-tasks
+
+- Improved filtering & sorting
+
+- Deployment
+
+## 🧪 Status
+
+🚧 Actively developed   
+✅ Backend API functional  
+🟢 Frontend scaffolded
