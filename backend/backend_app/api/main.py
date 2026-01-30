@@ -17,10 +17,21 @@ from backend_app.models.task import TaskStatus, TaskPriority
 from backend_app.schemas.task import TaskCreate, TaskRead, TaskUpdate
 from backend_app.core.auth import get_current_user
 from backend_app.models.user import User
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 app = FastAPI(title="Task Manager API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Vite frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(auth_router)
 
 
