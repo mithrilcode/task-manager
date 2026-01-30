@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Tasks from "./pages/Tasks";
+import Register from "./pages/Register";
 import PublicRoute from "./routes/PublicRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -14,6 +15,10 @@ function App() {
           {/* Public-only routes */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
+          </Route>
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Route>
 
           {/* Protected routes */}
