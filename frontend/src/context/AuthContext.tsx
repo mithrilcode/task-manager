@@ -3,7 +3,7 @@ import { loginUser } from "../api/auth";
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -17,11 +17,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(!!token);
   }, []);
 
-  const login = async (username: string, password: string) => {
-    const data = await loginUser(username, password);
+  const login = async (identifier: string, password: string) => {
+    const data = await loginUser(identifier, password);
     localStorage.setItem("access_token", data.access_token);
-    setIsAuthenticated(true)
-  }
+    setIsAuthenticated(true);
+  };
 
   const logout = () => {
     localStorage.removeItem("access_token");

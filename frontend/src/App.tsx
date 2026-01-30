@@ -1,14 +1,36 @@
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Tasks from "./pages/Tasks";
+import Register from "./pages/Register";
+import PublicRoute from "./routes/PublicRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+import "./App.css";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-white">
-        Tailwind is working 🚀
-      </h1>
-    </div>
-  )
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-900 text-white">
+        <Routes>
+          {/* Public-only routes */}
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
+
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/tasks" element={<Tasks />} />
+          </Route>
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
 }
 
-export default App
+
+export default App;
 
