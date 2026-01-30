@@ -19,8 +19,16 @@ const Login = () => {
     try {
       await login(identifier, password);
       navigate("/tasks");
-    } catch {
-      setError("Invalid credentials");
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+
+      let message = "Unable to log in. Please try again.";
+
+      if (typeof detail === "string") {
+        message = detail;
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
