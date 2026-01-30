@@ -15,6 +15,7 @@ build/
 venv/
 backend/.env
 .env.*
+frontend/.env
 
 # =========================
 # PyCharm / IDE
