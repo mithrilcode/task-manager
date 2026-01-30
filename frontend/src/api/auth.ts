@@ -5,22 +5,23 @@ type LoginResponse = {
   token_type: string;
 };
 
+type LoginRequest = {
+  identifier: string;
+  password: string;
+};
+
 export const loginUser = async (
-  username: string,
+  identifier: string,
   password: string
 ): Promise<LoginResponse> => {
-  const formData = new URLSearchParams();
-  formData.append("username", username);
-  formData.append("password", password);
+  const payload: LoginRequest = {
+    identifier,
+    password,
+  };
 
   const response = await api.post<LoginResponse>(
     "/auth/login",
-    formData,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
+    payload
   );
 
   return response.data;
