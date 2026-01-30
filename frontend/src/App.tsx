@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Tasks from "./pages/Tasks";
+import PublicRoute from "./routes/PublicRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import "./App.css";
@@ -10,8 +11,10 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-gray-900 text-white">
         <Routes>
-          {/* Public route */}
-          <Route path="/login" element={<Login />} />
+          {/* Public-only routes */}
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
