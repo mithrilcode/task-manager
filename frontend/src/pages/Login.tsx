@@ -6,7 +6,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,10 +17,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(username, password);
+      await login(identifier, password);
       navigate("/tasks");
     } catch {
-      setError("Invalid username or password");
+      setError("Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -39,9 +39,9 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Email or Username"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
           required
           className="w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring"
         />
