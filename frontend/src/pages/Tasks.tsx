@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getTasks } from "../api/tasks";
-import type { Task } from "../api/tasks";
+import { getTasks, createTask } from "../api/tasks";
+import type { Task, TaskCreate } from "../api/tasks";
 
 const Tasks = () => {
   const { logout } = useAuth();
@@ -11,6 +11,13 @@ const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState<TaskCreate["priority"]>("medium");
+  const [dueDate, setDueDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
 
   const handleLogout = () => {
     logout();
@@ -32,6 +39,39 @@ const Tasks = () => {
     loadTasks();
   }, []);
 
+  const handleCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!title || !dueDate) {
+      setFormError("Title and due date are required");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const newTask = await createTask({
+        title,
+        priority,
+        due_date: dueDate,
+        description: description || undefined,
+      });
+
+      setTasks((prev) => [newTask, ...prev]);
+
+      // reset form
+      setTitle("");
+      setPriority("medium");
+      setDueDate("");
+      setDescription("");
+    } catch {
+      setFormError("Failed to create task");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -44,6 +84,66 @@ const Tasks = () => {
           Logout
         </button>
       </div>
+
+      <form
+        onSubmit={handleCreateTask}
+        className="mb-6 p-4 border rounded space-y-4"
+      >
+        <h2 className="font-semibold">Create Task</h2>
+
+        {formError && (
+          <p className="text-red-500 text-sm">{formError}</p>
+        )}
+
+        <div>
+          <input
+            type="text"
+            placeholder="Task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <select
+            value={priority}
+            onChange={(e) =>
+              setPriority(e.target.value as TaskCreate["priority"])
+            }
+            className="p-2 border rounded"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="p-2 border rounded"
+          />
+        </div>
+
+        <div>
+          <textarea
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-2 border rounded"
+            rows={3}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+        >
+          {submitting ? "Creating..." : "Create Task"}
+        </button>
+      </form>
 
       {loading && (
         <p className="text-gray-400">Loading tasks…</p>
