@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { loginUser } from "../api/auth";
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -16,10 +17,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsAuthenticated(!!token);
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem("access_token", token);
-    setIsAuthenticated(true);
-  };
+  const login = async (username: string, password: string) => {
+    const data = await loginUser(username, password);
+    localStorage.setItem("access_token", data.access_token);
+    setIsAuthenticated(true)
+  }
 
   const logout = () => {
     localStorage.removeItem("access_token");
