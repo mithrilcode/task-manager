@@ -6,6 +6,7 @@ import {
   getTasks,
   createTask,
   updateTask,
+  deleteTask,
 } from "../api/tasks";
 
 import type {
@@ -73,6 +74,12 @@ const Tasks = () => {
     );
   };
 
+  const removeTaskFromState = (taskId: string) => {
+    setTasks((prev) =>
+      prev.filter((task) => task.id !== taskId)
+    );
+  };
+
   /* =========================
      Create Task
   ========================= */
@@ -107,6 +114,24 @@ const Tasks = () => {
       setFormError("Failed to create task");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  /* =========================
+     Delete Task
+  ========================= */
+  const handleDeleteTask = async (taskId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteTask(taskId);
+      removeTaskFromState(taskId);
+    } catch {
+      alert("Failed to delete task");
     }
   };
 
@@ -232,29 +257,40 @@ const Tasks = () => {
                   className="bg-transparent border-b border-white/30 focus:outline-none flex-1 text-white"
                 />
 
-                <button
-                  onClick={async () => {
-                    try {
-                      const updated = await updateTask(
-                        task.id,
-                        {
-                          status:
-                            task.status === "done"
-                              ? "todo"
-                              : "done",
-                        }
-                      );
-                      applyTaskUpdate(updated);
-                    } catch {
-                      alert("Failed to update status");
+                <div className="flex gap-3 text-sm">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const updated = await updateTask(
+                          task.id,
+                          {
+                            status:
+                              task.status === "done"
+                                ? "todo"
+                                : "done",
+                          }
+                        );
+                        applyTaskUpdate(updated);
+                      } catch {
+                        alert("Failed to update status");
+                      }
+                    }}
+                    className="text-indigo-400 hover:underline"
+                  >
+                    {task.status === "done"
+                      ? "Mark Todo"
+                      : "Mark Done"}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleDeleteTask(task.id)
                     }
-                  }}
-                  className="text-sm text-indigo-400 hover:underline"
-                >
-                  {task.status === "done"
-                    ? "Mark Todo"
-                    : "Mark Done"}
-                </button>
+                    className="text-red-400 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-4 items-center">
