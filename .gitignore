@@ -78,3 +78,5 @@ dist-ssr
 *.sln
 *.sw?
 
+PROJECT_DECISIONS.md
+PROJECT_STRUCTURE.md

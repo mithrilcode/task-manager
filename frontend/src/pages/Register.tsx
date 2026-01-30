@@ -19,8 +19,18 @@ const Register = () => {
     try {
       await registerUser(email, username, password);
       navigate("/login");
-    } catch {
-      setError("Unable to create account");
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+
+      let message = "Unable to create account. Please try again.";
+
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        message = detail[0]?.msg ?? message;
+      }
+
+      setError(message)
     } finally {
       setLoading(false);
     }
@@ -67,7 +77,7 @@ const Register = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full p-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50"
+          className="w-full p-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
