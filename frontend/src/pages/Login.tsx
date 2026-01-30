@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -66,11 +66,17 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full p-2 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50"
+          className="w-full p-2 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
+      <p className="mt-4 text-sm text-center text-gray-400">
+        Don&apos;t have an account?{" "}
+        <Link to="/register" className="text-blue-400 hover:underline">
+          Create one
+        </Link>
+      </p>
     </div>
   );
 };
