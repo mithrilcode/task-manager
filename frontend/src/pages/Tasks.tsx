@@ -1,29 +1,52 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getTasks, createTask } from "../api/tasks";
-import type { Task, TaskCreate } from "../api/tasks";
+
+import {
+  getTasks,
+  createTask,
+  updateTask,
+} from "../api/tasks";
+
+import type {
+  Task,
+  TaskCreate,
+  TaskUpdate,
+} from "../api/tasks";
 
 const Tasks = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  /* =========================
+     Task List State
+  ========================= */
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  /* =========================
+     Create Task Form State
+  ========================= */
   const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState<TaskCreate["priority"]>("medium");
+  const [priority, setPriority] =
+    useState<TaskCreate["priority"]>("medium");
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-
+  /* =========================
+     Auth
+  ========================= */
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  /* =========================
+     Load Tasks
+  ========================= */
   useEffect(() => {
     async function loadTasks() {
       try {
@@ -39,7 +62,23 @@ const Tasks = () => {
     loadTasks();
   }, []);
 
-  const handleCreateTask = async (e: React.FormEvent) => {
+  /* =========================
+     Helpers
+  ========================= */
+  const applyTaskUpdate = (updatedTask: Task) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      )
+    );
+  };
+
+  /* =========================
+     Create Task
+  ========================= */
+  const handleCreateTask = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
     setFormError(null);
 
@@ -60,7 +99,6 @@ const Tasks = () => {
 
       setTasks((prev) => [newTask, ...prev]);
 
-      // reset form
       setTitle("");
       setPriority("medium");
       setDueDate("");
@@ -73,7 +111,8 @@ const Tasks = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 text-white">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Tasks</h1>
 
@@ -85,33 +124,34 @@ const Tasks = () => {
         </button>
       </div>
 
+      {/* Create Task Form */}
       <form
         onSubmit={handleCreateTask}
-        className="mb-6 p-4 border rounded space-y-4"
+        className="mb-8 p-6 border border-white/20 rounded space-y-4"
       >
-        <h2 className="font-semibold">Create Task</h2>
+        <h2 className="font-semibold text-lg">Create Task</h2>
 
         {formError && (
-          <p className="text-red-500 text-sm">{formError}</p>
+          <p className="text-red-400 text-sm">{formError}</p>
         )}
 
-        <div>
-          <input
-            type="text"
-            placeholder="Task title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400"
+        />
 
         <div className="flex gap-4">
           <select
             value={priority}
             onChange={(e) =>
-              setPriority(e.target.value as TaskCreate["priority"])
+              setPriority(
+                e.target.value as TaskCreate["priority"]
+              )
             }
-            className="p-2 border rounded"
+            className="p-2 rounded bg-white text-gray-900"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -122,60 +162,147 @@ const Tasks = () => {
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 rounded bg-white text-gray-900"
           />
         </div>
 
-        <div>
-          <textarea
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border rounded"
-            rows={3}
-          />
-        </div>
+        <textarea
+          placeholder="Description (optional)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400"
+        />
 
         <button
           type="submit"
           disabled={submitting}
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+          className="px-5 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50"
         >
           {submitting ? "Creating..." : "Create Task"}
         </button>
       </form>
 
+      {/* States */}
       {loading && (
         <p className="text-gray-400">Loading tasks…</p>
       )}
 
       {error && (
-        <p className="text-red-500">{error}</p>
+        <p className="text-red-400">{error}</p>
       )}
 
       {!loading && !error && tasks.length === 0 && (
         <p className="text-gray-400">No tasks yet.</p>
       )}
 
+      {/* Task List */}
       {!loading && !error && tasks.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {tasks.map((task) => (
             <li
               key={task.id}
-              className="border rounded p-3 flex flex-col gap-1"
+              className="border border-white/20 rounded p-4 space-y-2"
             >
-              <div className="font-medium">{task.title}</div>
+              <div className="flex justify-between gap-2">
+                <input
+                  type="text"
+                  value={task.title}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setTasks((prev) =>
+                      prev.map((t) =>
+                        t.id === task.id
+                          ? { ...t, title: value }
+                          : t
+                      )
+                    );
+                  }}
+                  onBlur={async (e) => {
+                    try {
+                      const updated = await updateTask(
+                        task.id,
+                        { title: e.target.value }
+                      );
+                      applyTaskUpdate(updated);
+                    } catch {
+                      alert("Failed to update title");
+                    }
+                  }}
+                  className="bg-transparent border-b border-white/30 focus:outline-none flex-1 text-white"
+                />
 
-              <div className="text-sm text-gray-500">
-                Priority: {task.priority} · Status: {task.status}
+                <button
+                  onClick={async () => {
+                    try {
+                      const updated = await updateTask(
+                        task.id,
+                        {
+                          status:
+                            task.status === "done"
+                              ? "todo"
+                              : "done",
+                        }
+                      );
+                      applyTaskUpdate(updated);
+                    } catch {
+                      alert("Failed to update status");
+                    }
+                  }}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  {task.status === "done"
+                    ? "Mark Todo"
+                    : "Mark Done"}
+                </button>
               </div>
 
-              <div className="text-sm text-gray-400">
-                Due: {new Date(task.due_date).toLocaleDateString()}
+              <div className="flex gap-4 items-center">
+                <select
+                  value={task.priority}
+                  onChange={async (e) => {
+                    try {
+                      const updated = await updateTask(
+                        task.id,
+                        {
+                          priority:
+                            e.target.value as TaskUpdate["priority"],
+                        }
+                      );
+                      applyTaskUpdate(updated);
+                    } catch {
+                      alert("Failed to update priority");
+                    }
+                  }}
+                  className="p-1 rounded bg-white text-gray-900 text-sm"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+
+                <input
+                  type="date"
+                  value={task.due_date.slice(0, 10)}
+                  onChange={async (e) => {
+                    try {
+                      const updated = await updateTask(
+                        task.id,
+                        { due_date: e.target.value }
+                      );
+                      applyTaskUpdate(updated);
+                    } catch {
+                      alert("Failed to update due date");
+                    }
+                  }}
+                  className="p-1 rounded bg-white text-gray-900 text-sm"
+                />
               </div>
 
               {task.description && (
-                <div className="text-sm">{task.description}</div>
+                <p className="text-sm text-gray-300">
+                  {task.description}
+                </p>
               )}
             </li>
           ))}
