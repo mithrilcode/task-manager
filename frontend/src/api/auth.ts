@@ -10,6 +10,12 @@ type LoginRequest = {
   password: string;
 };
 
+type RegisterRequest = {
+  email: string;
+  username: string;
+  password: string;
+};
+
 export const loginUser = async (
   identifier: string,
   password: string
@@ -25,4 +31,18 @@ export const loginUser = async (
   );
 
   return response.data;
+};
+
+export const registerUser = async (
+  email: string,
+  username: string,
+  password: string
+): Promise<void> => {
+  const payload: RegisterRequest = {
+    email,
+    username,
+    password,
+  };
+
+  await api.post("/auth/register", payload);
 };
