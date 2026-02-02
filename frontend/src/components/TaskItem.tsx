@@ -11,16 +11,19 @@ type TaskItemProps = {
 const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
   const [title, setTitle] = useState(task.title);
   const [savingTitle, setSavingTitle] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleTitleBlur = async () => {
     if (title === task.title) return;
 
     try {
       setSavingTitle(true);
+      setError(null);
+
       const updated = await updateTask(task.id, { title });
       onUpdate(updated);
     } catch {
-      alert("Failed to update title");
+      setError("Failed to update title");
       setTitle(task.title);
     } finally {
       setSavingTitle(false);
@@ -29,12 +32,14 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
 
   const toggleStatus = async () => {
     try {
+      setError(null);
+
       const updated = await updateTask(task.id, {
         status: task.status === "done" ? "todo" : "done",
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update status");
+      setError("Failed to update status");
     }
   };
 
@@ -42,23 +47,27 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
     value: TaskUpdate["priority"]
   ) => {
     try {
+      setError(null);
+
       const updated = await updateTask(task.id, {
         priority: value,
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update priority");
+      setError("Failed to update priority");
     }
   };
 
   const handleDueDateChange = async (value: string) => {
     try {
+      setError(null);
+
       const updated = await updateTask(task.id, {
         due_date: value,
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update due date");
+      setError("Failed to update due date");
     }
   };
 
@@ -70,10 +79,11 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
     if (!confirmed) return;
 
     try {
+      setError(null);
       await deleteTask(task.id);
       onDelete(task.id);
     } catch {
-      alert("Failed to delete task");
+      setError("Failed to delete task");
     }
   };
 
@@ -136,6 +146,12 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
       {task.description && (
         <p className="text-sm text-gray-300">
           {task.description}
+        </p>
+      )}
+
+      {error && (
+        <p className="text-sm text-red-400">
+          {error}
         </p>
       )}
     </li>
