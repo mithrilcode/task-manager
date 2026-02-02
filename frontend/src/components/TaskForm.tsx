@@ -68,19 +68,21 @@ const TaskForm = ({ onCreate }: TaskFormProps) => {
         type="text"
         placeholder="Task title"
         value={title}
+        disabled={submitting}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400"
+        className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400 disabled:opacity-50"
       />
 
       <div className="flex gap-4">
         <select
           value={priority}
+          disabled={submitting}
           onChange={(e) =>
             setPriority(
               e.target.value as TaskCreate["priority"]
             )
           }
-          className="p-2 rounded bg-white text-gray-900"
+          className="p-2 rounded bg-white text-gray-900 disabled:opacity-50"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -90,19 +92,21 @@ const TaskForm = ({ onCreate }: TaskFormProps) => {
         <input
           type="date"
           value={dueDate}
+          disabled={submitting}
           onChange={(e) => setDueDate(e.target.value)}
-          className="p-2 rounded bg-white text-gray-900"
+          className="p-2 rounded bg-white text-gray-900 disabled:opacity-50"
         />
       </div>
 
       <textarea
         placeholder="Description (optional)"
         value={description}
+        disabled={submitting}
         onChange={(e) =>
           setDescription(e.target.value)
         }
         rows={3}
-        className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400"
+        className="w-full p-2 rounded bg-white text-gray-900 placeholder-gray-400 disabled:opacity-50"
       />
 
       <button
@@ -110,7 +114,7 @@ const TaskForm = ({ onCreate }: TaskFormProps) => {
         disabled={submitting}
         className="px-5 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50"
       >
-        {submitting ? "Creating..." : "Create Task"}
+        {submitting ? "Creating…" : "Create Task"}
       </button>
     </form>
   );
