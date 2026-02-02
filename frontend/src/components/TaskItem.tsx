@@ -11,16 +11,21 @@ type TaskItemProps = {
 const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
   const [title, setTitle] = useState(task.title);
   const [savingTitle, setSavingTitle] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleTitleBlur = async () => {
     if (title === task.title) return;
 
     try {
       setSavingTitle(true);
+      setError(null);
+
       const updated = await updateTask(task.id, { title });
       onUpdate(updated);
     } catch {
-      alert("Failed to update title");
+      setError("Failed to update title");
       setTitle(task.title);
     } finally {
       setSavingTitle(false);
@@ -29,12 +34,17 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
 
   const toggleStatus = async () => {
     try {
+      setIsUpdating(true);
+      setError(null);
+
       const updated = await updateTask(task.id, {
         status: task.status === "done" ? "todo" : "done",
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update status");
+      setError("Failed to update status");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -42,23 +52,33 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
     value: TaskUpdate["priority"]
   ) => {
     try {
+      setIsUpdating(true);
+      setError(null);
+
       const updated = await updateTask(task.id, {
         priority: value,
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update priority");
+      setError("Failed to update priority");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDueDateChange = async (value: string) => {
     try {
+      setIsUpdating(true);
+      setError(null);
+
       const updated = await updateTask(task.id, {
         due_date: value,
       });
       onUpdate(updated);
     } catch {
-      alert("Failed to update due date");
+      setError("Failed to update due date");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -70,10 +90,15 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
     if (!confirmed) return;
 
     try {
+      setIsDeleting(true);
+      setError(null);
+
       await deleteTask(task.id);
       onDelete(task.id);
     } catch {
-      alert("Failed to delete task");
+      setError("Failed to delete task");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -85,25 +110,29 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
-          disabled={savingTitle}
-          className="bg-transparent border-b border-white/30 focus:outline-none flex-1 text-white"
+          disabled={savingTitle || isUpdating || isDeleting}
+          className="bg-transparent border-b border-white/30 focus:outline-none flex-1 text-white disabled:opacity-50"
         />
 
         <div className="flex gap-3 text-sm">
           <button
             onClick={toggleStatus}
-            className="text-indigo-400 hover:underline"
+            disabled={isUpdating || isDeleting}
+            className="text-indigo-400 hover:underline disabled:opacity-50"
           >
-            {task.status === "done"
+            {isUpdating
+              ? "Saving…"
+              : task.status === "done"
               ? "Mark Todo"
               : "Mark Done"}
           </button>
 
           <button
             onClick={handleDelete}
-            className="text-red-400 hover:underline"
+            disabled={isDeleting}
+            className="text-red-400 hover:underline disabled:opacity-50"
           >
-            Delete
+            {isDeleting ? "Deleting…" : "Delete"}
           </button>
         </div>
       </div>
@@ -111,12 +140,13 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
       <div className="flex gap-4 items-center">
         <select
           value={task.priority}
+          disabled={isUpdating || isDeleting}
           onChange={(e) =>
             handlePriorityChange(
               e.target.value as TaskUpdate["priority"]
             )
           }
-          className="p-1 rounded bg-white text-gray-900 text-sm"
+          className="p-1 rounded bg-white text-gray-900 text-sm disabled:opacity-50"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -126,16 +156,23 @@ const TaskItem = ({ task, onUpdate, onDelete }: TaskItemProps) => {
         <input
           type="date"
           value={task.due_date.slice(0, 10)}
+          disabled={isUpdating || isDeleting}
           onChange={(e) =>
             handleDueDateChange(e.target.value)
           }
-          className="p-1 rounded bg-white text-gray-900 text-sm"
+          className="p-1 rounded bg-white text-gray-900 text-sm disabled:opacity-50"
         />
       </div>
 
       {task.description && (
         <p className="text-sm text-gray-300">
           {task.description}
+        </p>
+      )}
+
+      {error && (
+        <p className="text-sm text-red-400">
+          {error}
         </p>
       )}
     </li>

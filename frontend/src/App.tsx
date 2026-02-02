@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Tasks from "./pages/Tasks";
 import Register from "./pages/Register";
+import Landing from "./pages/Landing.tsx";
 import PublicRoute from "./routes/PublicRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -14,9 +15,7 @@ function App() {
         <Routes>
           {/* Public-only routes */}
           <Route element={<PublicRoute />}>
-            <Route path="/login" element={<Login />} />
-          </Route>
-          <Route element={<PublicRoute />}>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Route>
@@ -31,6 +30,4 @@ function App() {
   );
 }
 
-
 export default App;
-
