@@ -5,15 +5,14 @@ import { useAuth } from "../context/AuthContext";
 import {
   getTasks,
   createTask,
-  updateTask,
-  deleteTask,
 } from "../api/tasks";
 
 import type {
   Task,
   TaskCreate,
-  TaskUpdate,
 } from "../api/tasks";
+
+import TaskItem from "../components/TaskItem";
 
 const Tasks = () => {
   const { logout } = useAuth();
@@ -69,7 +68,9 @@ const Tasks = () => {
   const applyTaskUpdate = (updatedTask: Task) => {
     setTasks((prev) =>
       prev.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
+        task.id === updatedTask.id
+          ? updatedTask
+          : task
       )
     );
   };
@@ -117,24 +118,6 @@ const Tasks = () => {
     }
   };
 
-  /* =========================
-     Delete Task
-  ========================= */
-  const handleDeleteTask = async (taskId: string) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this task?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await deleteTask(taskId);
-      removeTaskFromState(taskId);
-    } catch {
-      alert("Failed to delete task");
-    }
-  };
-
   return (
     <div className="p-6 text-white">
       {/* Header */}
@@ -157,7 +140,9 @@ const Tasks = () => {
         <h2 className="font-semibold text-lg">Create Task</h2>
 
         {formError && (
-          <p className="text-red-400 text-sm">{formError}</p>
+          <p className="text-red-400 text-sm">
+            {formError}
+          </p>
         )}
 
         <input
@@ -210,7 +195,9 @@ const Tasks = () => {
 
       {/* States */}
       {loading && (
-        <p className="text-gray-400">Loading tasks…</p>
+        <p className="text-gray-400">
+          Loading tasks…
+        </p>
       )}
 
       {error && (
@@ -218,129 +205,21 @@ const Tasks = () => {
       )}
 
       {!loading && !error && tasks.length === 0 && (
-        <p className="text-gray-400">No tasks yet.</p>
+        <p className="text-gray-400">
+          No tasks yet.
+        </p>
       )}
 
       {/* Task List */}
       {!loading && !error && tasks.length > 0 && (
         <ul className="space-y-4">
           {tasks.map((task) => (
-            <li
+            <TaskItem
               key={task.id}
-              className="border border-white/20 rounded p-4 space-y-2"
-            >
-              <div className="flex justify-between gap-2">
-                <input
-                  type="text"
-                  value={task.title}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setTasks((prev) =>
-                      prev.map((t) =>
-                        t.id === task.id
-                          ? { ...t, title: value }
-                          : t
-                      )
-                    );
-                  }}
-                  onBlur={async (e) => {
-                    try {
-                      const updated = await updateTask(
-                        task.id,
-                        { title: e.target.value }
-                      );
-                      applyTaskUpdate(updated);
-                    } catch {
-                      alert("Failed to update title");
-                    }
-                  }}
-                  className="bg-transparent border-b border-white/30 focus:outline-none flex-1 text-white"
-                />
-
-                <div className="flex gap-3 text-sm">
-                  <button
-                    onClick={async () => {
-                      try {
-                        const updated = await updateTask(
-                          task.id,
-                          {
-                            status:
-                              task.status === "done"
-                                ? "todo"
-                                : "done",
-                          }
-                        );
-                        applyTaskUpdate(updated);
-                      } catch {
-                        alert("Failed to update status");
-                      }
-                    }}
-                    className="text-indigo-400 hover:underline"
-                  >
-                    {task.status === "done"
-                      ? "Mark Todo"
-                      : "Mark Done"}
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleDeleteTask(task.id)
-                    }
-                    className="text-red-400 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-center">
-                <select
-                  value={task.priority}
-                  onChange={async (e) => {
-                    try {
-                      const updated = await updateTask(
-                        task.id,
-                        {
-                          priority:
-                            e.target.value as TaskUpdate["priority"],
-                        }
-                      );
-                      applyTaskUpdate(updated);
-                    } catch {
-                      alert("Failed to update priority");
-                    }
-                  }}
-                  className="p-1 rounded bg-white text-gray-900 text-sm"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-
-                <input
-                  type="date"
-                  value={task.due_date.slice(0, 10)}
-                  onChange={async (e) => {
-                    try {
-                      const updated = await updateTask(
-                        task.id,
-                        { due_date: e.target.value }
-                      );
-                      applyTaskUpdate(updated);
-                    } catch {
-                      alert("Failed to update due date");
-                    }
-                  }}
-                  className="p-1 rounded bg-white text-gray-900 text-sm"
-                />
-              </div>
-
-              {task.description && (
-                <p className="text-sm text-gray-300">
-                  {task.description}
-                </p>
-              )}
-            </li>
+              task={task}
+              onUpdate={applyTaskUpdate}
+              onDelete={removeTaskFromState}
+            />
           ))}
         </ul>
       )}
